@@ -1,0 +1,57 @@
+﻿<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:ColorPaletteApp.ViewModels"
+             xmlns:models="clr-namespace:ColorPaletteApp.Models"
+             x:Class="ColorPaletteApp.Views.MainPage"
+             x:DataType="viewmodels:MainViewModel">
+
+    <Grid RowDefinitions="Auto, Auto, Auto" Margin="30" RowSpacing="20" ColumnSpacing="15">
+        <HorizontalStackLayout Spacing="10" Grid.Row="0">
+            <Button Text="-" Command="{Binding DecreaseCommand}" />
+            <Entry Text="{Binding NumberColors}" 
+                   Keyboard="Numeric"
+                   WidthRequest="60"
+                   HorizontalTextAlignment="Center" />
+            <Button Text="+" Command="{Binding IncreaseCommand}" />
+        </HorizontalStackLayout>
+
+        <Button Text="Generate new palette"
+                Command="{Binding GenerateCommand}"
+                Grid.Row="1"/>
+
+        <ScrollView Grid.Column="0" Grid.Row="2">
+            <FlexLayout 
+                BindableLayout.ItemsSource="{Binding Colors}" 
+                Wrap="Wrap"
+                JustifyContent="Center"
+                AlignItems="Center"
+                Direction="Row">
+
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="models:ColorItem">
+                        <Border 
+                            Margin="5"
+                            WidthRequest="150"
+                            HeightRequest="150"
+                            BackgroundColor="{Binding HexCode}"   
+                            Stroke="{Binding HexCode}"
+                            StrokeThickness="10">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="20"/>
+                            </Border.StrokeShape>
+                            <Label 
+                                Text="{Binding HexCode}" 
+                                TextColor="#FFF" BackgroundColor="#888"
+                                Padding="6,2,6,2"
+                                FontAttributes="Bold"
+                                HorizontalOptions="Center"
+                                VerticalOptions="Center"
+                                VerticalTextAlignment="Center"
+                                HorizontalTextAlignment="Center" />
+                        </Border>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </FlexLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>
