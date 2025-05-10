@@ -7,5 +7,7 @@ public partial class MainPage : ContentPage
         InitializeComponent();
         BindingContext = new ViewModels.MainViewModel();
     }
+
+    
 }
 

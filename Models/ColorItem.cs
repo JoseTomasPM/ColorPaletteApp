@@ -7,6 +7,7 @@ namespace ColorPaletteApp.Models
     {
         private string? _hexCode = "#FFFFFF";
         private bool _isLocked = false;
+        private string _category = "Base"; 
 
         public string? HexCode
         {
@@ -33,6 +34,21 @@ namespace ColorPaletteApp.Models
                 }
             }
         }
+
+        public string Category
+        {
+            get => _category;
+            set
+            {
+                if (_category != value)
+                {
+                    _category = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        
 
         public event PropertyChangedEventHandler? PropertyChanged;
 

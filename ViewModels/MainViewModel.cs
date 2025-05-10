@@ -1,23 +1,26 @@
-﻿using System;
+﻿using ColorPaletteApp.Models;
+using ColorPaletteApp.Views;
+using Microsoft.Maui;
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
-using ColorPaletteApp.Models;
-using Microsoft.Maui;
 
 namespace ColorPaletteApp.ViewModels
 {
     public class MainViewModel : INotifyPropertyChanged
     {
         public ObservableCollection<ColorItem> Colors { get; set; }
+
         public ICommand GenerateCommand { get; }
         public ICommand IncreaseCommand { get; }
         public ICommand DecreaseCommand { get; }
-        private int _numberColors = 5;
+        public ICommand RandomColorCommand { get; }
 
+        private int _numberColors = 5;
         public int NumberColors
         {
             get => _numberColors;
@@ -34,61 +37,84 @@ namespace ColorPaletteApp.ViewModels
             }
         }
 
-
-        private ColorHarmony _selectedHarmony = ColorHarmony.Complementary;
-        public ColorHarmony SelectedHarmony
+        private string _baseHex;
+        public string BaseHex
         {
-            get => _selectedHarmony;
+            get => _baseHex;
             set
             {
-                _selectedHarmony = value;
+                _baseHex = value;
                 OnPropertyChanged();
-                GenerateColors();
+                TryGeneratePaletteFromBase();
             }
         }
-        public Array Harmonies => Enum.GetValues(typeof(ColorHarmony));
 
         public MainViewModel()
         {
             Colors = new ObservableCollection<ColorItem>();
+
             GenerateCommand = new Command(GenerateColors);
             IncreaseCommand = new Command(() => NumberColors++);
             DecreaseCommand = new Command(() => { if (NumberColors > 1) NumberColors--; });
-            GenerateColors();
+            RandomColorCommand = new Command(() =>
+            {
+                BaseHex = $"#{new Random().Next(0x1000000):X6}";
+            });
+            
+
+            // Inicializa con color aleatorio
+            BaseHex = $"#{new Random().Next(0x1000000):X6}";
         }
 
+        private void TryGeneratePaletteFromBase()
+        {
+            if (!string.IsNullOrWhiteSpace(BaseHex))
+                GenerateColors();
+        }
 
         private void GenerateColors()
         {
-            Random rand = new Random();
-            Colors.Clear();
+            if (string.IsNullOrWhiteSpace(BaseHex)) return;
 
-            // Color base aleatorio
-            var baseColorHex = $"#{rand.Next(0x1000000):X6}";
-            Colors.Add(new ColorItem { HexCode = baseColorHex });
-
-            // Analogos o similares
-            for (int i = 2; i < NumberColors; i++)
+            try
             {
-                // Variamos tono/saturación para dar variedad
-                System.Drawing.Color color = HEXtoRGB(baseColorHex);
-                int r = Math.Min(255, Math.Max(0, color.R + rand.Next(-30, 30)));
-                int g = Math.Min(255, Math.Max(0, color.G + rand.Next(-30, 30)));
-                int b = Math.Min(255, Math.Max(0, color.B + rand.Next(-30, 30)));
-                var hex = $"#{r:X2}{g:X2}{b:X2}";
-                Colors.Add(new ColorItem { HexCode = hex });
+                var baseRgb = HEXtoRGB(BaseHex);
+                Colors.Clear();
 
+                // Color base
+                Colors.Add(new ColorItem { HexCode = BaseHex, Category = "Base" });
+
+                // Complementario
+                var compHex = GetComplementaryColor(BaseHex);
+                Colors.Add(new ColorItem { HexCode = compHex, Category = "Complementario" });
+
+                // Análogos
+                float[] analogShifts = new float[] { -15, 15, -30, 30 };
+                foreach (var shift in analogShifts)
+                {
+                    var analogHex = ShiftHue(baseRgb, shift);
+                    Colors.Add(new ColorItem { HexCode = analogHex, Category = "Análogo" });
+                }
+
+                // Triádicos
+                float[] triadicShifts = new float[] { -120, 120 };
+                foreach (var shift in triadicShifts)
+                {
+                    var triadicHex = ShiftHue(baseRgb, shift);
+                    Colors.Add(new ColorItem { HexCode = triadicHex, Category = "Triádico" });
+                }
+
+                OnPropertyChanged(nameof(Colors));
             }
-            // Color complementario
-            var complementaryHex = GetComplementaryColor(baseColorHex);
-            Colors.Add(new ColorItem { HexCode = complementaryHex });
-
-            OnPropertyChanged(nameof(Colors));
+            catch
+            {
+                // HEX inválido o error en conversión
+                // Puedes mostrar alerta aquí si quieres
+            }
         }
 
         private string GetComplementaryColor(string hex)
         {
-            // Convertimos el color de HEX  RGB
             System.Drawing.Color color = HEXtoRGB(hex);
             int r = 255 - color.R;
             int g = 255 - color.G;
@@ -98,11 +124,46 @@ namespace ColorPaletteApp.ViewModels
 
         private System.Drawing.Color HEXtoRGB(string hex)
         {
-            var color = System.Drawing.ColorTranslator.FromHtml(hex);
-            return color;
+            return System.Drawing.ColorTranslator.FromHtml(hex);
         }
 
-        // INotifyPropertyChanged implementation
+        private string ShiftHue(System.Drawing.Color color, float shiftDegrees)
+        {
+            float hue = color.GetHue();
+            float newHue = (hue + shiftDegrees + 360) % 360;
+
+            float saturation = color.GetSaturation();
+            float brightness = color.GetBrightness();
+
+            System.Drawing.Color newColor = FromHSL(newHue, saturation, brightness);
+            return $"#{newColor.R:X2}{newColor.G:X2}{newColor.B:X2}";
+        }
+
+        private System.Drawing.Color FromHSL(float h, float s, float l)
+        {
+            double c = (1 - Math.Abs(2 * l - 1)) * s;
+            double x = c * (1 - Math.Abs((h / 60) % 2 - 1));
+            double m = l - c / 2;
+
+            double r = 0, g = 0, b = 0;
+
+            if (h < 60) { r = c; g = x; }
+            else if (h < 120) { r = x; g = c; }
+            else if (h < 180) { g = c; b = x; }
+            else if (h < 240) { g = x; b = c; }
+            else if (h < 300) { r = x; b = c; }
+            else { r = c; b = x; }
+
+            return System.Drawing.Color.FromArgb(
+                (int)((r + m) * 255),
+                (int)((g + m) * 255),
+                (int)((b + m) * 255)
+            );
+        }
+
+        
+
+        // INotifyPropertyChanged
         public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string? name = null) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
