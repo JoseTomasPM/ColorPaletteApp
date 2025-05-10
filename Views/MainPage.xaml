@@ -5,9 +5,9 @@
              x:Class="ColorPaletteApp.Views.MainPage">
 
     
-    <Grid RowDefinitions="Auto, *" Margin="30" RowSpacing="20">
+    <Grid RowDefinitions="Auto, *" Margin="20" RowSpacing="60">
         <!-- Eliminar la parte del color picker y dejar solo lo necesario -->
-        <VerticalStackLayout Grid.Row="0" Spacing="10">
+        <VerticalStackLayout Grid.Row="0">
             <Label Text="Choose base color" FontAttributes="Bold" FontSize="16"/>
 
             <HorizontalStackLayout Spacing="10">
@@ -40,7 +40,7 @@
                         <VerticalStackLayout
                             WidthRequest="200"
                             HeightRequest="180"
-                            Margin="5"
+                            Margin="1"
                             HorizontalOptions="Center">
 
                             <Border 
@@ -63,7 +63,6 @@
                             <Label 
                                 Text="{Binding HexCode}" 
                                 TextColor="#FFF"
-                                BackgroundColor="#333"
                                 FontAttributes="Bold"
                                 HorizontalTextAlignment="Center"
                                 Padding="4">

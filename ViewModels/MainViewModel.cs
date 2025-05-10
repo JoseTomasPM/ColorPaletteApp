@@ -58,9 +58,35 @@ namespace ColorPaletteApp.ViewModels
             DecreaseCommand = new Command(() => { if (NumberColors > 1) NumberColors--; });
             RandomColorCommand = new Command(() =>
             {
-                BaseHex = $"#{new Random().Next(0x1000000):X6}";
+                // Generar dos posiciones aleatorias para "fc" y "03"
+                var random = new Random();
+                int pos1 = random.Next(0, 3); // Posición para "fc" (0, 1 o 2)
+                int pos2;
+                do
+                {
+                    pos2 = random.Next(0, 3); // Posición para "03" (0, 1 o 2)
+                } while (pos2 == pos1); // Asegurarse de que no sea la misma posición
+
+                // Crear un array para los 3 componentes RGB
+                string[] components = { "00", "00", "00" };
+
+                // Asignar "fc" y "03" a las posiciones aleatorias
+                components[pos1] = "FC";
+                components[pos2] = "03";
+
+                // Generar los otros valores aleatorios
+                for (int i = 0; i < 3; i++)
+                {
+                    if (components[i] == "00") // Solo generar si no es "fc" o "03"
+                    {
+                        components[i] = $"{random.Next(0x00, 0x100):X2}";
+                    }
+                }
+
+                // Combinar los componentes en un color hexadecimal
+                BaseHex = $"#{components[0]}{components[1]}{components[2]}";
             });
-            
+
 
             // Inicializa con color aleatorio
             BaseHex = $"#{new Random().Next(0x1000000):X6}";
@@ -89,7 +115,7 @@ namespace ColorPaletteApp.ViewModels
                 Colors.Add(new ColorItem { HexCode = compHex, Category = "Complementario" });
 
                 // Análogos
-                float[] analogShifts = new float[] { -15, 15, -30, 30 };
+                float[] analogShifts = new float[] { -40, 40, -20, 20, 60, -60 };
                 foreach (var shift in analogShifts)
                 {
                     var analogHex = ShiftHue(baseRgb, shift);
@@ -159,10 +185,7 @@ namespace ColorPaletteApp.ViewModels
                 (int)((g + m) * 255),
                 (int)((b + m) * 255)
             );
-        }
-        
-
-
+        }     
         // INotifyPropertyChanged
         public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string? name = null) =>
