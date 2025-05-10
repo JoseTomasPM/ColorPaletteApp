@@ -16,7 +16,7 @@
                     Text="{Binding BaseHex}"
                     WidthRequest="120"/>
 
-                <Button Text="Random" Command="{Binding RandomColorCommand}" />
+                <Button Text="Random" Command="{Binding RandomColorCommand}"/>
             </HorizontalStackLayout>
 
             <!--<Button
@@ -49,6 +49,12 @@
                                 StrokeThickness="10"
                                 HeightRequest="130"
                                 WidthRequest="200">
+
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnBorderTapped"/>
+                                </Border.GestureRecognizers>
+
+
                                 <Border.StrokeShape>
                                     <RoundRectangle CornerRadius="20"/>
                                 </Border.StrokeShape>
@@ -60,7 +66,17 @@
                                 BackgroundColor="#333"
                                 FontAttributes="Bold"
                                 HorizontalTextAlignment="Center"
-                                Padding="4"/>
+                                Padding="4">
+
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnLabelTapped"/>
+                                    
+                                </Label.GestureRecognizers>
+                                
+
+
+
+                            </Label>
 
                             <Label 
                                 Text="{Binding Category}" 

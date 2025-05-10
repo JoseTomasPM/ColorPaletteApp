@@ -160,8 +160,8 @@ namespace ColorPaletteApp.ViewModels
                 (int)((b + m) * 255)
             );
         }
-
         
+
 
         // INotifyPropertyChanged
         public event PropertyChangedEventHandler? PropertyChanged;
