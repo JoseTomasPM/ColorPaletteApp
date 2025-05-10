@@ -4,6 +4,7 @@
              xmlns:models="clr-namespace:ColorPaletteApp.Models"
              x:Class="ColorPaletteApp.Views.MainPage">
 
+    
     <Grid RowDefinitions="Auto, *" Margin="30" RowSpacing="20">
         <!-- Eliminar la parte del color picker y dejar solo lo necesario -->
         <VerticalStackLayout Grid.Row="0" Spacing="10">
